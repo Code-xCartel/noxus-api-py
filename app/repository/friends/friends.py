@@ -48,7 +48,7 @@ class FriendsRepository(RepoHelpersMixin):
         )
 
     @staticmethod
-    def create_delete_query(user_id: str, friend_id: str):
+    def create_or_query(user_id: str, friend_id: str):
         return (
             or_(
                 and_(Friends.user_id == user_id, Friends.friend_id == friend_id),
@@ -87,7 +87,14 @@ class FriendsRepository(RepoHelpersMixin):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
             )
-        # relation = self.get_one_by_query(query= ,model=Friends) TODO: add duplicate relation error
+        relation = self.get_one_by_query(
+            query=self.create_or_query(user_id=self_id, friend_id=nox_id),
+            model=Friends,
+        )
+        if relation:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Request already exists"
+            )
         query = {
             "user_id": self_id,
             "friend_id": nox_id,
@@ -130,7 +137,7 @@ class FriendsRepository(RepoHelpersMixin):
         )
         values = {"status": Status.REJECTED.value, "action_by": self_id}
         _ = self.update_one(query=query, model=Friends, update_values=values)
-        query = self.create_delete_query(user_id=self_id, friend_id=nox_id)
+        query = self.create_or_query(user_id=self_id, friend_id=nox_id)
         _ = self.delete_one(query=query, model=Friends)
         return JSONResponse(details="Request rejected")
 
@@ -141,7 +148,7 @@ class FriendsRepository(RepoHelpersMixin):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
             )
-        query = self.create_delete_query(user_id=self_id, friend_id=nox_id)
+        query = self.create_or_query(user_id=self_id, friend_id=nox_id)
         _ = self.delete_one(query=query, model=Friends)
         return JSONResponse(details="Request deleted")
 
