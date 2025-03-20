@@ -1,7 +1,7 @@
 import inspect
 from functools import lru_cache
 
-from fastapi import Depends
+from fastapi import Depends, Request
 
 from app.core.bound_repository import BoundRepository
 from app.core.config import ApiConfig
@@ -38,8 +38,9 @@ def get_dependency_container(api_config: ApiConfig) -> DependencyContainer:
     return DependencyContainer(api_config=api_config)
 
 
-def reqDep(cls):
+def reqDep(cls, **kwargs):
     def resolve(
+        request: Request,
         container: DependencyContainer = Depends(
             lambda: get_dependency_container(ApiConfig())
         ),
@@ -48,7 +49,7 @@ def reqDep(cls):
         Automatically resolves class dependencies.
         """
         init_params = inspect.signature(cls.__init__).parameters
-        dependencies = {}
+        dependencies = {"request": request}
 
         for param_name, param in init_params.items():
             if param_name == "self":

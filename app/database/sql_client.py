@@ -1,4 +1,9 @@
+import functools
 from app.database.database import Database
+from concurrent.futures import ThreadPoolExecutor
+import asyncio
+
+executor = ThreadPoolExecutor(max_workers=5)
 
 
 class SQLClient:
@@ -19,4 +24,10 @@ class SQLClient:
                 finally:
                     session.close()
 
-        return wrapper
+        async def async_session(self, *args, **kwargs):
+            loop = asyncio.get_running_loop()
+            return await loop.run_in_executor(
+                executor, functools.partial(wrapper, self, *args, **kwargs)
+            )
+
+        return async_session

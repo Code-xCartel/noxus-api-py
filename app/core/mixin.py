@@ -1,14 +1,16 @@
 from app.core.bound_repository import BoundRepository
 from app.core.config import ApiConfig
+from fastapi import Request
 
 
 class RepoHelpersMixin:
     repo: BoundRepository
     api_config: ApiConfig
 
-    def __init__(self, repo: BoundRepository, api_config: ApiConfig):
+    def __init__(self, repo: BoundRepository, api_config: ApiConfig, request: Request):
         self.repo = repo
         self.api_config = api_config
+        self.request = request
 
     def insert_one(self, *args, **kwargs):
         return self.repo.insert_one(*args, **kwargs)
