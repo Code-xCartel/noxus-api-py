@@ -12,96 +12,96 @@ router = APIRouter()
 @router.get(
     "/search/{nox_id}", status_code=status.HTTP_200_OK, response_model=FriendsResponse
 )
-async def search_friend(
+def search_friend(
     nox_id: str, friends_repo: FriendsRepository = reqDep(FriendsRepository)
 ):
-    response = await friends_repo.search(nox_id)
+    response = friends_repo.search(nox_id)
     return response
 
 
 @router.get("", status_code=status.HTTP_200_OK, response_model=List[FriendsResponse])
-async def get_friends(
+def get_friends(
     request: Request, friends_repo: FriendsRepository = reqDep(FriendsRepository)
 ):
-    response = await friends_repo.get_accepted_friends(request)
+    response = friends_repo.get_accepted_friends(request)
     return response
 
 
 @router.get(
     "/pending", status_code=status.HTTP_200_OK, response_model=List[FriendsResponse]
 )
-async def get_pending_requests(
+def get_pending_requests(
     request: Request, friends_repo: FriendsRepository = reqDep(FriendsRepository)
 ):
-    response = await friends_repo.get_pending_friends(request)
+    response = friends_repo.get_pending_friends(request)
     return response
 
 
 @router.get(
     "/blocked", status_code=status.HTTP_200_OK, response_model=List[FriendsResponse]
 )
-async def get_blocked_requests(
+def get_blocked_requests(
     request: Request, friends_repo: FriendsRepository = reqDep(FriendsRepository)
 ):
-    response = await friends_repo.get_blocked_friends(request)
+    response = friends_repo.get_blocked_friends(request)
     return response
 
 
 @router.post("/add/{nox_id}", status_code=status.HTTP_200_OK)
-async def add_new_friend(
+def add_new_friend(
     request: Request,
     nox_id: str,
     friends_repo: FriendsRepository = reqDep(FriendsRepository),
 ):
-    response = await friends_repo.add_friend(request, nox_id)
+    response = friends_repo.add_friend(request, nox_id)
     return response
 
 
 @router.put("/accept/{nox_id}", status_code=status.HTTP_200_OK)
-async def accept_friend(
+def accept_friend(
     request: Request,
     nox_id: str,
     friends_repo: FriendsRepository = reqDep(FriendsRepository),
 ):
-    response = await friends_repo.accept(request, nox_id)
+    response = friends_repo.accept(request, nox_id)
     return response
 
 
 @router.put("/reject/{nox_id}", status_code=status.HTTP_200_OK)
-async def accept_friend(
+def accept_friend(
     request: Request,
     nox_id: str,
     friends_repo: FriendsRepository = reqDep(FriendsRepository),
 ):
-    response = await friends_repo.reject(request, nox_id)
+    response = friends_repo.reject(request, nox_id)
     return response
 
 
 @router.delete("/remove/{nox_id}", status_code=status.HTTP_200_OK)
-async def remove_friend(
+def remove_friend(
     request: Request,
     nox_id: str,
     friends_repo: FriendsRepository = reqDep(FriendsRepository),
 ):
-    response = await friends_repo.delete(request, nox_id)
+    response = friends_repo.delete(request, nox_id)
     return response
 
 
 @router.put("/block/{nox_id}", status_code=status.HTTP_200_OK)
-async def block_friend(
+def block_friend(
     request: Request,
     nox_id: str,
     friends_repo: FriendsRepository = reqDep(FriendsRepository),
 ):
-    response = await friends_repo.block(request, nox_id)
+    response = friends_repo.block(request, nox_id)
     return response
 
 
 @router.put("/unblock/{nox_id}", status_code=status.HTTP_200_OK)
-async def unblock_friend(
+def unblock_friend(
     request: Request,
     nox_id: str,
     friends_repo: FriendsRepository = reqDep(FriendsRepository),
 ):
-    response = await friends_repo.unblock(request, nox_id)
+    response = friends_repo.unblock(request, nox_id)
     return response

@@ -9,18 +9,18 @@ router = APIRouter()
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(
+def register(
     request: UserInExtended,
     auth_repo: AuthorizationRepository = reqDep(AuthorizationRepository),
 ):
-    response = await auth_repo.create_user(request)
+    response = auth_repo.create_user(request)
     return response
 
 
 @router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)
-async def login(
+def login(
     request: UserIn,
     auth_repo: AuthorizationRepository = reqDep(AuthorizationRepository),
 ):
-    response = await auth_repo.authenticate_user(request)
+    response = auth_repo.authenticate_user(request)
     return response

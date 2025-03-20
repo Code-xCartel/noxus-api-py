@@ -50,43 +50,43 @@ class FriendsRepository(RepoHelpersMixin):
     @staticmethod
     def create_or_query(user_id: str, friend_id: str):
         stmt = or_(
-                and_(Friends.user_id == user_id, Friends.friend_id == friend_id),
-                and_(Friends.user_id == friend_id, Friends.friend_id == user_id),
-            )
+            and_(Friends.user_id == user_id, Friends.friend_id == friend_id),
+            and_(Friends.user_id == friend_id, Friends.friend_id == user_id),
+        )
         return stmt
 
-    async def get_accepted_friends(self, request: Request):
+    def get_accepted_friends(self, request: Request):
         self_id = request.state.payload["nox_id"]
-        friends = await self.repo.execute_raw(
+        friends =  self.repo.execute_raw(
             stmt=self.create_get_query(user_id=self_id, st=Status.ACCEPTED)
         )
         filtered_friends = [item for item in friends if item[0] != self_id]
         return filtered_friends
 
-    async def get_pending_friends(self, request: Request):
+    def get_pending_friends(self, request: Request):
         self_id = request.state.payload["nox_id"]
-        friends = await self.repo.execute_raw(
+        friends =  self.repo.execute_raw(
             stmt=self.create_get_query(user_id=self_id, st=Status.PENDING)
         )
         filtered_friends = [item for item in friends if item[0] != self_id]
         return filtered_friends
 
-    async def get_blocked_friends(self, request: Request):
+    def get_blocked_friends(self, request: Request):
         self_id = request.state.payload["nox_id"]
-        friends = await self.repo.execute_raw(
+        friends =  self.repo.execute_raw(
             stmt=self.create_get_query(user_id=self_id, st=Status.BLOCKED)
         )
         filtered_friends = [item for item in friends if item[0] != self_id]
         return filtered_friends
 
-    async def add_friend(self, request: Request, nox_id: str):
+    def add_friend(self, request: Request, nox_id: str):
         self_id = request.state.payload["nox_id"]
-        friend = await self.get_one(query=nox_id, query_field="nox_id", model=User)
+        friend =  self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not friend or self_id == nox_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
             )
-        relation = await self.get_one_by_query(
+        relation =  self.get_one_by_query(
             query=self.create_or_query(user_id=self_id, friend_id=nox_id),
             model=Friends,
         )
@@ -102,17 +102,17 @@ class FriendsRepository(RepoHelpersMixin):
         _ = self.insert_one(query=query, model=Friends)
         return JSONResponse(details="Request sent")
 
-    async def search(self, nox_id: str):
-        user = await self.get_one(query=nox_id, query_field="nox_id", model=User)
+    def search(self, nox_id: str):
+        user =  self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
             )
         return user
 
-    async def accept(self, request: Request, nox_id: str):
+    def accept(self, request: Request, nox_id: str):
         self_id = request.state.payload["nox_id"]
-        user = await self.get_one(query=nox_id, query_field="nox_id", model=User)
+        user =  self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
@@ -121,39 +121,39 @@ class FriendsRepository(RepoHelpersMixin):
             user_id=self_id, friend_id=nox_id, st=[Status.PENDING.value]
         )
         values = {"status": Status.ACCEPTED.value, "action_by": self_id}
-        _ = await self.update_one(query=query, model=Friends, update_values=values)
+        _ =  self.update_one(query=query, model=Friends, update_values=values)
         return JSONResponse(details="Request accepted")
 
-    async def reject(self, request: Request, nox_id: str):
+    def reject(self, request: Request, nox_id: str):
         self_id = request.state.payload["nox_id"]
-        user = await self.get_one(query=nox_id, query_field="nox_id", model=User)
+        user =  self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
             )
-        query = await self.create_action_query(
+        query =  self.create_action_query(
             user_id=self_id, friend_id=nox_id, st=[Status.PENDING.value]
         )
         values = {"status": Status.REJECTED.value, "action_by": self_id}
-        _ = await self.update_one(query=query, model=Friends, update_values=values)
+        _ =  self.update_one(query=query, model=Friends, update_values=values)
         query = self.create_or_query(user_id=self_id, friend_id=nox_id)
-        _ = await self.delete_one(query=query, model=Friends)
+        _ =  self.delete_one(query=query, model=Friends)
         return JSONResponse(details="Request rejected")
 
-    async def delete(self, request: Request, nox_id: str):
+    def delete(self, request: Request, nox_id: str):
         self_id = request.state.payload["nox_id"]
-        user = await self.get_one(query=nox_id, query_field="nox_id", model=User)
+        user =  self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
             )
         query = self.create_or_query(user_id=self_id, friend_id=nox_id)
-        _ = await self.delete_one(query=query, model=Friends)
+        _ =  self.delete_one(query=query, model=Friends)
         return JSONResponse(details="Request deleted")
 
-    async def block(self, request: Request, nox_id: str):
+    def block(self, request: Request, nox_id: str):
         self_id = request.state.payload["nox_id"]
-        user = await self.get_one(query=nox_id, query_field="nox_id", model=User)
+        user =  self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
@@ -164,12 +164,12 @@ class FriendsRepository(RepoHelpersMixin):
             st=[Status.PENDING.value, Status.ACCEPTED.value],
         )
         values = {"status": Status.BLOCKED.value, "action_by": self_id}
-        _ = await self.update_one(query=query, model=Friends, update_values=values)
+        _ =  self.update_one(query=query, model=Friends, update_values=values)
         return JSONResponse(details="Request blocked")
 
-    async def unblock(self, request: Request, nox_id: str):
+    def unblock(self, request: Request, nox_id: str):
         self_id = request.state.payload["nox_id"]
-        user = await self.get_one(query=nox_id, query_field="nox_id", model=User)
+        user =  self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
@@ -178,5 +178,5 @@ class FriendsRepository(RepoHelpersMixin):
             user_id=self_id, friend_id=nox_id, st=[Status.BLOCKED.value]
         )
         values = {"status": Status.ACCEPTED.value, "action_by": self_id}
-        _ = await self.update_one(query=query, model=Friends, update_values=values)
+        _ =  self.update_one(query=query, model=Friends, update_values=values)
         return JSONResponse(details="Request unblocked")
