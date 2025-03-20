@@ -4,11 +4,8 @@ from sqlalchemy import insert, select, text, update, delete
 
 
 class BaseRepository(abc.ABC):
-    client_factory = None
-
     def __init__(self, sql_client: SQLClient):
-        if self.client_factory is None:
-            self.client_factory = sql_client
+        self.client_factory = sql_client
 
     @SQLClient.handle_session
     def insert_one(self, query, model, session=None):
