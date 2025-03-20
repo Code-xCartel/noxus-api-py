@@ -31,6 +31,10 @@ class FriendsRepository(RepoHelpersMixin):
                 Friends.status == st.value,
             )
         )
+
+        if st.value == "blocked":
+            stmt = stmt.where(Friends.action_by == user_id)
+
         return stmt
 
     @staticmethod
@@ -57,7 +61,24 @@ class FriendsRepository(RepoHelpersMixin):
         friends = self.repo.execute_raw(
             stmt=self.create_get_query(user_id=self_id, st=Status.ACCEPTED)
         )
-        return friends
+        filtered_friends = [item for item in friends if item[0] != self_id]
+        return filtered_friends
+
+    def get_pending_friends(self, request: Request):
+        self_id = request.state.payload["nox_id"]
+        friends = self.repo.execute_raw(
+            stmt=self.create_get_query(user_id=self_id, st=Status.PENDING)
+        )
+        filtered_friends = [item for item in friends if item[0] != self_id]
+        return filtered_friends
+
+    def get_blocked_friends(self, request: Request):
+        self_id = request.state.payload["nox_id"]
+        friends = self.repo.execute_raw(
+            stmt=self.create_get_query(user_id=self_id, st=Status.BLOCKED)
+        )
+        filtered_friends = [item for item in friends if item[0] != self_id]
+        return filtered_friends
 
     def add_friend(self, request: Request, nox_id: str):
         self_id = request.state.payload["nox_id"]
@@ -112,3 +133,44 @@ class FriendsRepository(RepoHelpersMixin):
         query = self.create_delete_query(user_id=self_id, friend_id=nox_id)
         _ = self.delete_one(query=query, model=Friends)
         return JSONResponse(details="Request rejected")
+
+    def delete(self, request: Request, nox_id: str):
+        self_id = request.state.payload["nox_id"]
+        user = self.get_one(query=nox_id, query_field="nox_id", model=User)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
+            )
+        query = self.create_delete_query(user_id=self_id, friend_id=nox_id)
+        _ = self.delete_one(query=query, model=Friends)
+        return JSONResponse(details="Request deleted")
+
+    def block(self, request: Request, nox_id: str):
+        self_id = request.state.payload["nox_id"]
+        user = self.get_one(query=nox_id, query_field="nox_id", model=User)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
+            )
+        query = self.create_action_query(
+            user_id=self_id,
+            friend_id=nox_id,
+            st=[Status.PENDING.value, Status.ACCEPTED.value],
+        )
+        values = {"status": Status.BLOCKED.value, "action_by": self_id}
+        _ = self.update_one(query=query, model=Friends, update_values=values)
+        return JSONResponse(details="Request blocked")
+
+    def unblock(self, request: Request, nox_id: str):
+        self_id = request.state.payload["nox_id"]
+        user = self.get_one(query=nox_id, query_field="nox_id", model=User)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
+            )
+        query = self.create_action_query(
+            user_id=self_id, friend_id=nox_id, st=[Status.BLOCKED.value]
+        )
+        values = {"status": Status.ACCEPTED.value, "action_by": self_id}
+        _ = self.update_one(query=query, model=Friends, update_values=values)
+        return JSONResponse(details="Request unblocked")
