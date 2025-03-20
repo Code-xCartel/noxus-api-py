@@ -19,7 +19,7 @@ def search_friend(
     return response
 
 
-@router.get("/", status_code=status.HTTP_200_OK, response_model=List[FriendsResponse])
+@router.get("", status_code=status.HTTP_200_OK, response_model=List[FriendsResponse])
 def get_friends(
     request: Request, friends_repo: FriendsRepository = reqDep(FriendsRepository)
 ):

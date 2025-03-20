@@ -49,12 +49,11 @@ class FriendsRepository(RepoHelpersMixin):
 
     @staticmethod
     def create_or_query(user_id: str, friend_id: str):
-        return (
-            or_(
+        stmt = or_(
                 and_(Friends.user_id == user_id, Friends.friend_id == friend_id),
                 and_(Friends.user_id == friend_id, Friends.friend_id == user_id),
-            ),
-        )
+            )
+        return stmt
 
     def get_accepted_friends(self, request: Request):
         self_id = request.state.payload["nox_id"]
