@@ -86,7 +86,7 @@ class FriendsRepository(RepoHelpersMixin):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Invalid nox id"
             )
-        relation = self.get_one_by_query(
+        relation = await self.get_one_by_query(
             query=self.create_or_query(user_id=self_id, friend_id=nox_id),
             model=Friends,
         )
