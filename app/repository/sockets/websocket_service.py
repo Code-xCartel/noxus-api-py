@@ -52,9 +52,7 @@ class WebSocketService(RepoHelpersMixin):
         await socket.accept()
         nox_id = self.request.state.payload["nox_id"]
         status = self.request.headers.get("Status") or "online"
-        self.clients[nox_id] = Client(
-            socket=socket, payload=payload
-        )
+        self.clients[nox_id] = Client(socket=socket, payload=payload)
         await self.clients[nox_id].socket.send_text(
             f"Websocket Connected: {nox_id}, Status: {status}"
         )
@@ -69,7 +67,9 @@ class WebSocketService(RepoHelpersMixin):
         conn = self.clients[nox_id]
         await conn.send_text(message)
 
-    async def broadcast(self, message, to: Dict[str, Client] = None, is_explicit: bool = False):
+    async def broadcast(
+        self, message, to: Dict[str, Client] = None, is_explicit: bool = False
+    ):
         clients_to_broadcast = self.clients if not to and not is_explicit else to
         for nox_id, client in clients_to_broadcast.items():
             print(f"Broadcasting message to {nox_id}")

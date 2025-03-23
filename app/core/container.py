@@ -81,4 +81,5 @@ def reqDep(cls, **kwargs):
 
     return Depends(resolve)
 
+
 # TODO: rework to register/resolve dependencies

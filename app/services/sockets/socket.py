@@ -25,10 +25,12 @@ async def websocket_status(
     friends_repository: FriendsRepository = reqDep(FriendsRepository),
 ):
     try:
-        await status_repository.authorize_and_connect(websocket, fr_repo=friends_repository)
+        await status_repository.authorize_and_connect(
+            websocket, fr_repo=friends_repository
+        )
         await status_repository.get_all_status(friends_repository)
     except Exception as e:
-        print(str(e), 'error')
+        print(str(e), "error")
         raise WebSocketException(code=1008, reason=str(e))
 
     try:
