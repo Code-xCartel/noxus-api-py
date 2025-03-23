@@ -3,7 +3,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from app.core.container import reqDep
 from app.repository.friends.friends import FriendsRepository
-from app.services.websocket_service import WebSocketService, Status
+from app.repository.sockets.status.status import StatusRepository, Status
 
 ws_routes = []
 
@@ -21,20 +21,22 @@ def websocket_route(path: str):
 @websocket_route("/status")
 async def websocket_status(
     websocket: WebSocket,
-    websocket_service: WebSocketService = reqDep(WebSocketService),
+    status_repository: StatusRepository = reqDep(StatusRepository),
     friends_repository: FriendsRepository = reqDep(FriendsRepository),
 ):
     try:
-        await websocket_service.authorize_and_connect(websocket)
-        await websocket_service.get_all_status(friends_repository)
+        await status_repository.authorize_and_connect(websocket, fr_repo=friends_repository)
+        await status_repository.get_all_status(friends_repository)
     except Exception as e:
+        print(str(e), 'error')
         raise WebSocketException(code=1008, reason=str(e))
 
     try:
         while True:
             data = await websocket.receive_text()
-            await websocket_service.change_status(
+            await status_repository.change_status(
                 Status.getStatusType(data), friends_repository
             )
-    except WebSocketDisconnect:
-        await websocket_service.disconnect()
+    except WebSocketDisconnect as e:
+        print(str(e))
+        await status_repository.disconnect()

@@ -80,3 +80,5 @@ def reqDep(cls, **kwargs):
         return cls(**dependencies)  # Instantiate class with resolved dependencies
 
     return Depends(resolve)
+
+# TODO: rework to register/resolve dependencies
