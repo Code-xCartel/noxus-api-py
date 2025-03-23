@@ -22,6 +22,8 @@ class Database:
 
     @staticmethod
     def resolve_session(engine: Engine) -> Session:
-        return scoped_session(sessionmaker(
-            bind=engine, autoflush=False, autocommit=False, expire_on_commit=False
-        ))()
+        return scoped_session(
+            sessionmaker(
+                bind=engine, autoflush=False, autocommit=False, expire_on_commit=False
+            )
+        )()

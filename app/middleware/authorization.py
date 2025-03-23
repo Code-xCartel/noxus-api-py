@@ -1,6 +1,6 @@
 from enum import Enum
 
-from fastapi import Request, HTTPException
+from fastapi import Request
 from jose import jwt, JWTError
 from starlette import status
 from starlette.middleware.base import BaseHTTPMiddleware

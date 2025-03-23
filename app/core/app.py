@@ -1,7 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from app.core.config import ApiConfig
 from app.core.container import DependencyContainer
-from app.database.database import Database
 
 
 class App(FastAPI):
@@ -11,3 +10,6 @@ class App(FastAPI):
         self.config = config
         self.di = di
         super().__init__(**kwargs)
+
+    def create_container_from_request(self, request: Request) -> DependencyContainer:
+        pass  # TODO: implement dependency resolution

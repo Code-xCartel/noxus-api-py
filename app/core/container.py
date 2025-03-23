@@ -2,6 +2,7 @@ import inspect
 from functools import lru_cache
 
 from fastapi import Depends, Request
+from starlette.websockets import WebSocket
 
 from app.core.bound_repository import BoundRepository
 from app.core.config import ApiConfig
@@ -10,11 +11,22 @@ from app.database.sql_client import SQLClient
 
 
 class DependencyContainer:
-    def __init__(self, api_config: ApiConfig):
+    _instance = None
+
+    def __new__(cls, api_config: ApiConfig = None, create_new: bool = False):
+        if cls._instance is None:
+            cls._instance = object.__new__(cls)
+            cls._instance._init(api_config)
+        return cls._instance
+
+    def _init(self, api_config: ApiConfig = None):
         self._db = Database(db_url=api_config.DB_PG_URL, echo=True)
         self._sql_client = SQLClient(self._db)
         self._repo = BoundRepository(self._sql_client)
         self._api_config = api_config
+
+    def __init__(self, api_config: ApiConfig = None, create_new: bool = False):
+        pass
 
     @property
     def db(self) -> Database:
@@ -34,22 +46,28 @@ class DependencyContainer:
 
 
 @lru_cache()
-def get_dependency_container(api_config: ApiConfig) -> DependencyContainer:
+def get_dependency_container(api_config: ApiConfig = None) -> DependencyContainer:
     return DependencyContainer(api_config=api_config)
 
 
 def reqDep(cls, **kwargs):
     def resolve(
-        request: Request,
-        container: DependencyContainer = Depends(
-            lambda: get_dependency_container(ApiConfig())
-        ),
+        request: Request = None,
+        websocket: WebSocket = None,
     ):
         """
         Automatically resolves class dependencies.
         """
+        container: DependencyContainer = DependencyContainer()
+
+        if request and not hasattr(request.state, "dep_container"):
+            request.state.dep_container = container
+
+        if websocket and not hasattr(websocket.state, "dep_container"):
+            websocket.state.dep_container = container
+
         init_params = inspect.signature(cls.__init__).parameters
-        dependencies = {"request": request}
+        dependencies = {"request": request if request else websocket}
 
         for param_name, param in init_params.items():
             if param_name == "self":
