@@ -58,7 +58,7 @@ class WebSocketService(RepoHelpersMixin):
     async def disconnect(self):
         nox_id = self.request.state.payload["nox_id"]
         # await self.clients[nox_id].socket.send_text(f"Websocket Disconnected: {nox_id}")
-        await self.clients[nox_id].socket.close()
+        # await self.clients[nox_id].socket.close()
         del self.clients[nox_id]
 
     async def cast_to(self, nox_id, message: str):
