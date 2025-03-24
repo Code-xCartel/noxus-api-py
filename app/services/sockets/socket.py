@@ -35,10 +35,18 @@ async def websocket_status(
 
     try:
         while True:
-            data = await websocket.receive_text()
-            await status_repository.change_status(
-                Status.getStatusType(data), friends_repository
-            )
-    except WebSocketDisconnect as e:
-        print(str(e), 'disconnected from client side probably')
-        await status_repository.disconnect()
+            try:
+                data = await websocket.receive_text()
+                await status_repository.change_status(
+                    Status.getStatusType(data), friends_repository
+                )
+            except WebSocketDisconnect:
+                print('Disconnected from client side possibly')
+                await status_repository.disconnect()
+                break
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+                await status_repository.disconnect()
+                break
+    except Exception as e:
+        print(f"Fatal WebSocket error: {e}")
