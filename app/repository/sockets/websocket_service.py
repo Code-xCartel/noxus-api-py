@@ -26,10 +26,8 @@ class WebSocketService(RepoHelpersMixin):
             if path_regex.match(path):
                 return await self.connect(socket)
 
-        token = socket.headers.get("Authorization")
-        if not token:
-            raise WebSocketException(code=1008, reason="Authorization header required")
-        identity, key = token.split()
+        key = socket.query_params.get("tk")
+        identity = socket.query_params.get("sh")
         if not identity or not key:
             raise WebSocketException(code=1008, reason="Token must have two element")
         if identity != TOKEN.BEARER.value:
@@ -51,7 +49,7 @@ class WebSocketService(RepoHelpersMixin):
     async def connect(self, socket: WebSocket, payload: Any = None):
         await socket.accept()
         nox_id = self.request.state.payload["nox_id"]
-        status = self.request.headers.get("Status") or "online"
+        status = self.request.query_params.get("st") or "online"
         self.clients[nox_id] = Client(socket=socket, payload=payload)
         await self.clients[nox_id].socket.send_text(
             f"Websocket Connected: {nox_id}, Status: {status}"
