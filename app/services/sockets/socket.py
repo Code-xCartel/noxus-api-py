@@ -40,5 +40,5 @@ async def websocket_status(
                 Status.getStatusType(data), friends_repository
             )
     except WebSocketDisconnect as e:
-        print(str(e))
+        print(str(e), 'disconnected from client side probably')
         await status_repository.disconnect()
