@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from fastapi import Request
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from starlette.authentication import AuthenticationError
 
 from app.core.config import ApiConfig

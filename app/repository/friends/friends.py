@@ -1,9 +1,9 @@
 from enum import Enum
+from typing import List
 
 from fastapi import HTTPException
-from starlette import status
 from sqlalchemy import and_, or_, select
-from typing import List
+from starlette import status
 
 from app.core.mixin import RepoHelpersMixin
 from app.schemas.schemas import Friends, User

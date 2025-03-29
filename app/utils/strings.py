@@ -1,5 +1,5 @@
-import time
 import random
+import time
 
 char_strings = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 

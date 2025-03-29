@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from app.api.routes.auth.api import router as auth_router
 from app.api.routes.friends.api import router as friend_router
 from app.services.sockets.socket import router as socket_router

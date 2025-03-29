@@ -1,14 +1,16 @@
 import uuid
+
 from sqlalchemy import (
+    CheckConstraint,
     Column,
-    String,
-    func,
     DateTime,
     ForeignKey,
-    CheckConstraint,
+    String,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy.dialects.postgresql import UUID
+
 from app.database.database import Base
 
 

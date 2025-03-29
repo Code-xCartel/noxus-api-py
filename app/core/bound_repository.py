@@ -1,11 +1,11 @@
 import abc
 from typing import Optional
 
+from sqlalchemy import delete, insert, select, update
+
 from app.core.config import ApiConfig
 from app.database.sql_client import SQLClient
-from sqlalchemy import insert, select, update, delete
-
-from app.utils.auth_utils import UserRealm, AuthUtils
+from app.utils.auth_utils import AuthUtils, UserRealm
 
 
 class BaseRepository(abc.ABC):

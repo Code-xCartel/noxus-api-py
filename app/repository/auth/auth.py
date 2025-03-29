@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
-from starlette import status
+
 from fastapi import HTTPException
 from jose import jwt
-from app.core.mixin import RepoHelpersMixin
-from app.models.user import UserInExtended, UserIn
-from app.schemas.schemas import User
-from app.utils.strings import generate_unique_id, JSONResponse
 from passlib.context import CryptContext
+from starlette import status
+
+from app.core.mixin import RepoHelpersMixin
+from app.models.user import UserIn, UserInExtended
+from app.schemas.schemas import User
+from app.utils.strings import JSONResponse, generate_unique_id
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

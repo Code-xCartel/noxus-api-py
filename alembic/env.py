@@ -1,12 +1,10 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
+import app.schemas.schemas  # noqa
 from alembic import context
-
 from app.core.config import ApiConfig
-import app.schemas.schemas # noqa
 from app.database.database import Base
 
 print(Base.metadata.tables)

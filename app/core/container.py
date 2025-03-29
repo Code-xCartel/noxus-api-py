@@ -1,6 +1,7 @@
 import inspect
+from typing import Any, Callable, Dict, Generator, Optional, Tuple, get_type_hints
+
 import typing_inspect
-from typing import Any, Dict, Tuple, Callable, Generator, get_type_hints, Optional
 
 
 def _unwrap_type_hint(t: Any) -> Any:

@@ -1,6 +1,7 @@
+from typing import List
+
 from fastapi import APIRouter
 from starlette import status
-from typing import List
 
 from app.core.request import ReqDep
 from app.models.friends import FriendsResponse

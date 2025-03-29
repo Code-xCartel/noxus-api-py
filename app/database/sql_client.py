@@ -1,6 +1,6 @@
-from app.database.database import Database
 from concurrent.futures import ThreadPoolExecutor
 
+from app.database.database import Database
 
 executor = ThreadPoolExecutor(max_workers=5)
 

@@ -1,7 +1,8 @@
+from typing import Dict, Type, Union
+
 from starlette.middleware.cors import CORSMiddleware
 
 from app.core.config import ApiConfig
-from typing import Dict, Union, Type
 
 ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
 ALLOWED_ORIGINS_FOR_LOCAL = ["*"]

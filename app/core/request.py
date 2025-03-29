@@ -1,5 +1,6 @@
 from typing import Callable
-from fastapi import Request, Depends
+
+from fastapi import Depends, Request
 from starlette.websockets import WebSocket
 
 

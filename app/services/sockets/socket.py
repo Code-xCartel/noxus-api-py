@@ -1,8 +1,8 @@
-from fastapi import WebSocket, WebSocketException, APIRouter
+from fastapi import APIRouter, WebSocket, WebSocketException
 from starlette.websockets import WebSocketDisconnect
 
 from app.core.request import ReqDep
-from app.repository.sockets.status.status import StatusRepository, Status
+from app.repository.sockets.status.status import Status, StatusRepository
 
 router = APIRouter()
 

@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from app.core.bound_repository import BoundRepository
 from app.core.config import ApiConfig
 from app.core.container import Container
-from app.utils.auth_utils import UserRealm, AuthUtils
+from app.utils.auth_utils import AuthUtils, UserRealm
 
 
 class App(FastAPI):

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from starlette import status
 
 from app.core.request import ReqDep
-from app.models.user import UserInExtended, UserIn, LoginResponse
+from app.models.user import LoginResponse, UserIn, UserInExtended
 from app.repository.auth.auth import AuthorizationRepository
 
 router = APIRouter()
