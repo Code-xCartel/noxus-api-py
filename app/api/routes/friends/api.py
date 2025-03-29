@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from starlette import status
 from typing import List
 
@@ -60,7 +60,7 @@ def accept_friend(
 
 
 @router.put("/reject/{nox_id}", status_code=status.HTTP_200_OK)
-def accept_friend(
+def reject_friend(
     nox_id: str,
     friends_repo: FriendsRepository = ReqDep(FriendsRepository),
 ):

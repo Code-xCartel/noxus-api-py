@@ -1,10 +1,8 @@
 from typing import Dict, Any
 from pydantic import BaseModel
-from fastapi import WebSocketException
 from starlette.websockets import WebSocket
 
 from app.core.mixin import RepoHelpersMixin
-from app.utils.auth_utils import AuthScheme
 
 
 class Client(BaseModel):

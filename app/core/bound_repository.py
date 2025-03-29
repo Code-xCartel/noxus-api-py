@@ -45,14 +45,14 @@ class BaseRepository(abc.ABC):
     @SQLClient.handle_session
     def update_one(self, query, update_values, model, session=None):
         stmt = update(model).where(query).values(update_values)
-        result = session.execute(stmt)
+        session.execute(stmt)
         session.commit()
         return
 
     @SQLClient.handle_session
     def delete_one(self, query, model, session=None):
         stmt = delete(model).where(query)
-        result = session.execute(stmt)
+        session.execute(stmt)
         session.commit()
         return
 

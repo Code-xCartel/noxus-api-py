@@ -1,6 +1,6 @@
 from enum import Enum
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException
 from starlette import status
 from sqlalchemy import and_, or_, select
 from typing import List

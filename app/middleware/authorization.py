@@ -47,6 +47,6 @@ class WSAuthorizationMiddleware:
             payload = self.auth_utils.extract_payload_from_token(key)
             scope["state"]["user"] = payload
             return await self.app(scope, receive, send)
-        except AuthenticationError as e:
+        except AuthenticationError:
             await send({"type": "websocket.accept"})  # Accept the connection
             await send({"type": "websocket.close", "code": 1008})  # Then close

@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.core.config import ApiConfig
-import app.schemas.schemas
+import app.schemas.schemas # noqa
 from app.database.database import Base
 
 print(Base.metadata.tables)

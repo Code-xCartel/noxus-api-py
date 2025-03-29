@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from fastapi import Request, WebSocketException
+from fastapi import Request
 from jose import jwt, JWTError
 from starlette.authentication import AuthenticationError
 
@@ -48,11 +48,6 @@ class AuthUtils:
                 nox_id=payload["nox_id"],
             )
         except JWTError as e:
-            # if is_socket:
-            #     raise WebSocketException(
-            #         code=1008, reason=f"Could not validate token, {str(e)}"
-            #     )
-            # else:
             raise AuthenticationError(f"Invalid token, {str(e)}")
 
     @staticmethod
