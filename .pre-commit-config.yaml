@@ -3,4 +3,6 @@ repos:
     rev: v0.3.4  # Use the latest stable version
     hooks:
       - id: ruff
+      - id: ruff
+        args: [--select I --fix]
       - id: ruff-format
