@@ -55,32 +55,32 @@ class FriendsRepository(RepoHelpersMixin):
         )
         return stmt
 
-    def get_accepted_friends(self, request: Request):
-        self_id = request.state.payload["nox_id"]
+    def get_accepted_friends(self):
+        self_id = self.nox_id
         friends = self.repo.execute_raw(
             stmt=self.create_get_query(user_id=self_id, st=Status.ACCEPTED)
         )
         filtered_friends = [item for item in friends if item[0] != self_id]
         return filtered_friends
 
-    def get_pending_friends(self, request: Request):
-        self_id = request.state.payload["nox_id"]
+    def get_pending_friends(self):
+        self_id = self.nox_id
         friends = self.repo.execute_raw(
             stmt=self.create_get_query(user_id=self_id, st=Status.PENDING)
         )
         filtered_friends = [item for item in friends if item[0] != self_id]
         return filtered_friends
 
-    def get_blocked_friends(self, request: Request):
-        self_id = request.state.payload["nox_id"]
+    def get_blocked_friends(self):
+        self_id = self.nox_id
         friends = self.repo.execute_raw(
             stmt=self.create_get_query(user_id=self_id, st=Status.BLOCKED)
         )
         filtered_friends = [item for item in friends if item[0] != self_id]
         return filtered_friends
 
-    def add_friend(self, request: Request, nox_id: str):
-        self_id = request.state.payload["nox_id"]
+    def add_friend(self, nox_id: str):
+        self_id = self.nox_id
         friend = self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not friend or self_id == nox_id:
             raise HTTPException(
@@ -110,8 +110,8 @@ class FriendsRepository(RepoHelpersMixin):
             )
         return user
 
-    def accept(self, request: Request, nox_id: str):
-        self_id = request.state.payload["nox_id"]
+    def accept(self, nox_id: str):
+        self_id = self.nox_id
         user = self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
@@ -124,8 +124,8 @@ class FriendsRepository(RepoHelpersMixin):
         _ = self.update_one(query=query, model=Friends, update_values=values)
         return JSONResponse(details="Request accepted")
 
-    def reject(self, request: Request, nox_id: str):
-        self_id = request.state.payload["nox_id"]
+    def reject(self, nox_id: str):
+        self_id = self.nox_id
         user = self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
@@ -140,8 +140,8 @@ class FriendsRepository(RepoHelpersMixin):
         _ = self.delete_one(query=query, model=Friends)
         return JSONResponse(details="Request rejected")
 
-    def delete(self, request: Request, nox_id: str):
-        self_id = request.state.payload["nox_id"]
+    def delete(self, nox_id: str):
+        self_id = self.nox_id
         user = self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
@@ -151,8 +151,8 @@ class FriendsRepository(RepoHelpersMixin):
         _ = self.delete_one(query=query, model=Friends)
         return JSONResponse(details="Request deleted")
 
-    def block(self, request: Request, nox_id: str):
-        self_id = request.state.payload["nox_id"]
+    def block(self, nox_id: str):
+        self_id = self.nox_id
         user = self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(
@@ -167,8 +167,8 @@ class FriendsRepository(RepoHelpersMixin):
         _ = self.update_one(query=query, model=Friends, update_values=values)
         return JSONResponse(details="Request blocked")
 
-    def unblock(self, request: Request, nox_id: str):
-        self_id = request.state.payload["nox_id"]
+    def unblock(self, nox_id: str):
+        self_id = self.nox_id
         user = self.get_one(query=nox_id, query_field="nox_id", model=User)
         if not user:
             raise HTTPException(

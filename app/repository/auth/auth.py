@@ -46,7 +46,7 @@ class AuthorizationRepository(RepoHelpersMixin):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect password"
             )
-        encode = {
+        encode = {  # TODO: Replace with user realm class
             "email": existing_user.email,
             "username": existing_user.username,
             "nox_id": existing_user.nox_id,

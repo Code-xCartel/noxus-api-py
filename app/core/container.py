@@ -1,85 +1,208 @@
 import inspect
-from functools import lru_cache
-
-from fastapi import Depends, Request
-from starlette.websockets import WebSocket
-
-from app.core.bound_repository import BoundRepository
-from app.core.config import ApiConfig
-from app.database.database import Database
-from app.database.sql_client import SQLClient
+import typing_inspect
+from typing import Any, Dict, Tuple, Callable, Generator, get_type_hints, Optional
 
 
-class DependencyContainer:
-    _instance = None
+def _unwrap_type_hint(t: Any) -> Any:
+    if typing_inspect.is_optional_type(t):
+        return next(
+            (_unwrap_type_hint(th) for th in typing_inspect.get_args(t) if th), Any
+        )
+    return t
 
-    def __new__(cls, api_config: ApiConfig = None, create_new: bool = False):
-        if cls._instance is None:
-            cls._instance = object.__new__(cls)
-            cls._instance._init(api_config)
-        return cls._instance
 
-    def _init(self, api_config: ApiConfig = None):
-        self._db = Database(db_url=api_config.DB_PG_URL, echo=True)
-        self._sql_client = SQLClient(self._db)
-        self._repo = BoundRepository(self._sql_client)
-        self._api_config = api_config
+def _get_type_hints(handler: Callable) -> Dict[str, Any]:
+    func: Callable = handler
 
-    def __init__(self, api_config: ApiConfig = None, create_new: bool = False):
-        pass
+    if isinstance(handler, type):
+        for bt in handler.__mro__:
+            if "__init__" in bt.__dict__:
+                func = handler.__init__
+                break
+            elif "__new__" in bt.__dict__:
+                func = handler.__new__
+                break
+
+    type_hints = get_type_hints(func)
+
+    sig = inspect.signature(func)
+    for p_name in sig.parameters:
+        if p_name not in type_hints and p_name not in ("self", "cls", "args", "kwargs"):
+            type_hints[p_name] = Any
+
+    type_hints.pop("return", None)
+    return type_hints
+
+
+def _get_spec(
+    dependency: Callable,
+) -> Generator[Tuple[str, Any, bool, Any, bool], None, None]:
+    for name, type_hint in _get_type_hints(dependency).items():
+        unwrapped_type_hint = _unwrap_type_hint(type_hint)
+        yield (
+            name,
+            type_hint,
+            typing_inspect.is_optional_type(type_hint),
+            unwrapped_type_hint,
+            unwrapped_type_hint is Any,
+        )
+
+
+class Provider:
+    @classmethod
+    def of(cls, dependency: Any, provider: Any):
+        if isinstance(provider, Provider):
+            assert provider.dependency == dependency
+            return provider
+        return cls(dependency=dependency, provider=provider)
+
+    def __init__(self, dependency: Any, provider: Any):
+        self.dependency = dependency
+        self.provider = provider
+
+    def resolve(self, di: "Container") -> Any:
+        if isinstance(self.provider, Resolved):
+            return self.provider.res
+        elif not callable(self.provider):
+            return self.provider
+        params = di.collect_params(self.provider)
+        return self.provider(**params)
+
+
+class Resolved:
+    def __init__(self, resolution: Any) -> None:
+        self.res = resolution
+
+
+class DepRegistry:
+    def __init__(self) -> None:
+        self._providers: Dict[Any, Provider] = {}
+
+    def _store(self, provider: Provider) -> None:
+        self._providers[provider.dependency] = provider
+
+    def register(
+        self, dependency: Any, provider: Any = None, value: Any = None
+    ) -> None:
+        if value is not None:
+            provider = Resolved(resolution=value)
+        self._store(provider=Provider.of(dependency, provider))
+
+    def is_registered(self, dependency: Any) -> bool:
+        return dependency in self._providers
+
+    def __getitem__(self, dependency: Any) -> Provider:
+        if not self.is_registered(dependency):
+            raise KeyError(f"No registered dependency {dependency}")
+        return self._providers[dependency]
+
+    @staticmethod
+    def _copy_of_providers(
+        providers: Dict[Any, Provider], deep: bool = False
+    ) -> Dict[Any, Provider]:
+        if deep:
+            return {
+                p.dependency: Provider.of(p.dependency, p.provider)
+                for p in providers.values()
+            }
+        else:
+            return providers
+
+    def clone(self, *others: "DepRegistry", deep: bool = False) -> "DepRegistry":
+        deps = DepRegistry()
+        deps._providers.update(self._copy_of_providers(self._providers, deep=deep))
+        for other in others:
+            deps._providers.update(self._copy_of_providers(other._providers, deep=deep))
+        return deps
+
+
+class DepRegistryProxy:
+    def __init__(self) -> None:
+        self._dependencies = DepRegistry()
+
+    def register(
+        self, dependency: Any, provider: Any = None, value: Any = None
+    ) -> None:
+        self._dependencies.register(dependency, provider=provider, value=value)
 
     @property
-    def db(self) -> Database:
-        return self._db
-
-    @property
-    def sql_client(self) -> SQLClient:
-        return self._sql_client
-
-    @property
-    def repo(self) -> BoundRepository:
-        return self._repo
-
-    @property
-    def api_config(self) -> ApiConfig:
-        return self._api_config
+    def dependencies(self) -> DepRegistry:
+        return self._dependencies
 
 
-@lru_cache()
-def get_dependency_container(api_config: ApiConfig = None) -> DependencyContainer:
-    return DependencyContainer(api_config=api_config)
+class Container(DepRegistryProxy):
+    def __init__(self, *, dependencies: DepRegistry = None, name: str = None) -> None:
+        super().__init__()
+        if dependencies:
+            self._dependencies = dependencies
+        self._name = name
+        self.resolution_cache: Dict[Any, Any] = {}
 
+    def clone(self, *others: "Container", deep: bool = False, **kwargs) -> "Container":
+        dep_others = []
+        if others:
+            dep_others = [c.dependencies for c in others]
+        dep_clone = self.dependencies.clone(*dep_others, deep=deep)
+        return Container(dependencies=dep_clone, **kwargs)
 
-def reqDep(cls, **kwargs):
-    def resolve(
-        request: Request = None,
-        websocket: WebSocket = None,
-    ):
-        """
-        Automatically resolves class dependencies.
-        """
-        container: DependencyContainer = DependencyContainer()
+    def provides(self, dependency: Any) -> bool:
+        return self._dependencies.is_registered(dependency)
 
-        if request and not hasattr(request.state, "dep_container"):
-            request.state.dep_container = container
+    def register_and_resolve(self, dependency: Any, provider: Any, **kwargs) -> Any:
+        self.register(dependency, provider=provider, **kwargs)
+        return self.resolve(dependency)
 
-        if websocket and not hasattr(websocket.state, "dep_container"):
-            websocket.state.dep_container = container
+    def collect_params(self, resolution: Callable) -> Dict[str, Any]:
+        params = {}
 
-        init_params = inspect.signature(cls.__init__).parameters
-        dependencies = {"request": request if request else websocket}
+        for name, type_hint, is_optional, unwrapped_type_hint, is_any in _get_spec(
+            resolution
+        ):
+            try:
+                params[name] = self.resolve(name)
+                continue
+            except Exception as e:
+                if is_any:
+                    print(
+                        f"Error resolving dependency {name} for type {type_hint}, {e}"
+                    )
+                    continue
 
-        for param_name, param in init_params.items():
-            if param_name == "self":
-                continue  # Ignore self parameter
+            try:
+                params[name] = self.resolve(unwrapped_type_hint)
+            except Exception as e:
+                if not is_optional:
+                    print(
+                        f"Error resolving dependency {name} for type {unwrapped_type_hint}, {e}"
+                    )
 
-            # Fetch from DependencyContainer using property name
-            if hasattr(container, param_name):
-                dependencies[param_name] = getattr(container, param_name)
+        return params
 
-        return cls(**dependencies)  # Instantiate class with resolved dependencies
+    def clear_cache(self, dependency: Optional[Any]):
+        if dependency is None:
+            self.resolution_cache = {}
+        if dependency in self.resolution_cache:
+            del self.resolution_cache[dependency]
 
-    return Depends(resolve)
+    def register(
+        self, dependency: Any, provider: Any = None, value: Any = None
+    ) -> None:
+        self.clear_cache(dependency)
+        super().register(dependency, provider=provider, value=value)
 
+    def resolve(self, dependency: Any) -> Any:
+        if dependency is Container:
+            return self
 
-# TODO: rework to register/resolve dependencies
+        if self.provides(dependency):
+            if dependency not in self.resolution_cache:
+                provider = self.dependencies[dependency]
+                resolution = provider.resolve(self)
+
+                self.resolution_cache[dependency] = resolution
+            return self.resolution_cache[dependency]
+
+        params = self.collect_params(dependency)
+        res = dependency(**params)
+        provider = Provider.of(dependency, Resolved(res) if callable(res) else res)
+        return self.register_and_resolve(dependency, provider=provider)

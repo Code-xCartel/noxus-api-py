@@ -1,5 +1,3 @@
-from contextlib import contextmanager
-
 from app.database.database import Database
 from concurrent.futures import ThreadPoolExecutor
 
@@ -8,16 +6,15 @@ executor = ThreadPoolExecutor(max_workers=5)
 
 
 class SQLClient:
-    _client_engine = None
+    client_engine = None
 
     def __init__(self, db: Database):
-        self.db = db
-        SQLClient._client_engine = Database.engine
+        self.client_engine = db
 
     @staticmethod
     def handle_session(func):
         def wrapper(self, *args, **kwargs):
-            with Database.resolve_session(SQLClient._client_engine) as session:
+            with self.client_factory.client_engine.resolve_session() as session:
                 try:
                     # only use positional arguments in mixin function
                     result = func(self, session=session, **kwargs)

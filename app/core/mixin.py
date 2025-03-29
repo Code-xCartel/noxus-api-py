@@ -1,19 +1,34 @@
-from fastapi import Request
-
 from app.core.bound_repository import BoundRepository
-from app.core.config import ApiConfig
 
 
 class RepoHelpersMixin:
     repo: BoundRepository
-    api_config: ApiConfig
 
     def __init__(
-        self, repo: BoundRepository, api_config: ApiConfig, request: Request = None
+        self,
+        repo: BoundRepository,
     ):
         self.repo = repo
-        self.api_config = api_config
-        self.request = request
+
+    @property
+    def api_config(self):
+        return self.repo.api_config
+
+    @property
+    def auth_utils(self):
+        return self.repo.auth_utils
+
+    @property
+    def user_realm(self):
+        return self.repo.user_realm
+
+    @property
+    def nox_id(self):
+        return self.user_realm.nox_id
+
+    @property
+    def email(self):
+        return self.user_realm.email
 
     def insert_one(self, *args, **kwargs):
         return self.repo.insert_one(*args, **kwargs)

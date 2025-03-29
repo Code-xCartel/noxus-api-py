@@ -1,11 +1,17 @@
 import abc
+from typing import Optional
+
+from app.core.config import ApiConfig
 from app.database.sql_client import SQLClient
-from sqlalchemy import insert, select, text, update, delete
+from sqlalchemy import insert, select, update, delete
+
+from app.utils.auth_utils import UserRealm, AuthUtils
 
 
 class BaseRepository(abc.ABC):
-    def __init__(self, sql_client: SQLClient):
+    def __init__(self, sql_client: SQLClient, api_config: Optional[ApiConfig] = None):
         self.client_factory = sql_client
+        self.api_config = api_config
 
     @SQLClient.handle_session
     def insert_one(self, query, model, session=None):
@@ -52,5 +58,14 @@ class BaseRepository(abc.ABC):
 
 
 class BoundRepository(BaseRepository):
-    def __init__(self, sql_client: SQLClient):
-        super().__init__(sql_client)
+    # TODO: Update when bounding clients
+    def __init__(
+        self,
+        user_realm: UserRealm,
+        api_config: Optional[ApiConfig] = None,
+        sql_client: SQLClient = None,
+        auth_utils: AuthUtils = None,
+    ):
+        self.user_realm = user_realm
+        self.auth_utils = auth_utils
+        super().__init__(sql_client=sql_client, api_config=api_config)
