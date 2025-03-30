@@ -20,7 +20,7 @@ class Database:
         db_url = api_config.DB_PG_URL
         if Database.engine is None:
             logger.info("Initializing Postgres Engine")
-            self.engine = create_engine(db_url, echo=echo, echo_pool=echo_pool)
+            Database.engine = create_engine(db_url, echo=echo, echo_pool=echo_pool)
 
     def resolve_session(self) -> Session:
         return scoped_session(

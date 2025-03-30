@@ -44,6 +44,10 @@ class ApiConfig:
     ALLOW_CORS_FOR_LOCAL = ConfigVar("ALLOW_CORS_FOR_LOCAL", default=True)
     DEBUG = ConfigVar("DEBUG", default=True)
 
+    GIPHY_BASE_URL = ConfigVar("GIPHY_BASE_URL", default="https://api.giphy.com")
+    GIPHY_API_KEY = ConfigVar("GIPHY_API_KEY", default="ABCD")
+    GIPHY_RESPONSE_LIMIT = ConfigVar("GIPHY_RESPONSE_LIMIT", default=1)
+
     @cached_property
     def SKIP_AUTH_ROUTES(self):
         return (
