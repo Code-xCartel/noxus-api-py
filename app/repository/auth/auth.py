@@ -33,7 +33,7 @@ class AuthorizationRepository(RepoHelpersMixin):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="User already exists"
             )
-        user_dump["nox_id"] = generate_unique_id()
+        user_dump["nox_id"] = generate_unique_id(user_dump["email"])
         user_dump["password"] = bcrypt_context.hash(user_dump["password"])
         key = self.insert_one(query=user_dump, model=User)
         return JSONResponse(details=f"User created successfully {key}")

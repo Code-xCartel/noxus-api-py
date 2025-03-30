@@ -1,14 +1,25 @@
+import hashlib
 import random
+import socket
 import time
 
-char_strings = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
+def generate_unique_id(*args):
+    """
+    Generates a universally unique ID.
+    Any arguments only create more randomness.
+    """
+    t = int(time.time() * 1000)
+    r = int(random.random() * 100000000000000000)
+    try:
+        a = socket.gethostbyname(socket.gethostname())
+    except socket.gaierror:
+        # if we can't get a network address, just imagine one
+        a = random.random() * 100000000000000000
+    data = f"{t} {r} {a} {args}".encode()
+    data = hashlib.md5(data).hexdigest()
 
-def generate_unique_id(length=8):
-    timestamp = int(time.time() * 1000)  # Milliseconds since epoch
-    random_string = "".join(random.choices(char_strings, k=length))
-    unique_id = f"{timestamp}{random_string}"
-    return f"NOX-{unique_id[:length]}"
+    return f"NOX-{data}"
 
 
 class JSONResponse:
