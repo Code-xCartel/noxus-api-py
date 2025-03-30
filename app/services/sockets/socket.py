@@ -1,4 +1,5 @@
 from fastapi import APIRouter, WebSocket, WebSocketException
+from starlette import status
 from starlette.websockets import WebSocketDisconnect
 
 from app.core.request import ReqDep
@@ -22,7 +23,7 @@ async def websocket_status(
             await status_repository.change_status(Status.getStatusType(data))
         except WebSocketDisconnect as e:
             await status_repository.disconnect()
-            raise WebSocketException(code=1005, reason=str(e))
+            raise WebSocketException(code=status.WS_1005_NO_STATUS_RCVD, reason=str(e))
         except Exception as e:
             await status_repository.disconnect()
-            raise WebSocketException(code=1005, reason=str(e))
+            raise WebSocketException(code=status.WS_1005_NO_STATUS_RCVD, reason=str(e))
