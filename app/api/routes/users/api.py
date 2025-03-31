@@ -3,20 +3,32 @@ from typing import List
 from fastapi import APIRouter
 
 from app.core.request import ReqDep
-from app.models.user import AvatarsSearchResponse, AvatarUpdate, UsernameUpdate
+from app.models.user import (
+    AvatarsSearchResponse,
+    AvatarUpdate,
+    PasswordUpdate,
+    UsernameUpdate,
+)
 from app.repository.users.users import UsersRepository
 
 router = APIRouter()
 
 
-@router.post("/update-username")
+@router.put("/update-username")
 def update_username(
     username: UsernameUpdate, user_repo: UsersRepository = ReqDep(UsersRepository)
 ):
     return user_repo.change_username(username)
 
 
-@router.post("/update-avatar")
+@router.put("/update-password")
+def update_password(
+    passwords: PasswordUpdate, user_repo: UsersRepository = ReqDep(UsersRepository)
+):
+    return user_repo.change_password(passwords)
+
+
+@router.put("/update-avatar")
 def update_avatar(
     avatar: AvatarUpdate, user_repo: UsersRepository = ReqDep(UsersRepository)
 ):

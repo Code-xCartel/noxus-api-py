@@ -3,7 +3,8 @@ from fastapi import HTTPException
 from starlette import status
 
 from app.core.mixin import RepoHelpersMixin
-from app.models.user import AvatarUpdate, UsernameUpdate
+from app.models.user import AvatarUpdate, PasswordUpdate, UsernameUpdate
+from app.repository.auth.auth import bcrypt_context
 from app.schemas.schemas import User
 
 
@@ -12,6 +13,18 @@ class UsersRepository(RepoHelpersMixin):
         nox_id = self.nox_id
         query = User.nox_id == nox_id
         self.update_one(model=User, query=query, update_values=username.model_dump())
+        return
+
+    def change_password(self, passwords: PasswordUpdate):
+        nox_id = self.nox_id
+        user = self.get_one(model=User, query=nox_id, query_field="nox_id")
+        if not bcrypt_context.verify(passwords.password_old, user.password):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect password"
+            )
+        user.password = bcrypt_context.hash(passwords.password_new)
+        query = User.nox_id == nox_id
+        self.update_one(model=User, query=query, update_values=user.serialize_self())
         return
 
     def change_avatar(self, avatar: AvatarUpdate) -> None:

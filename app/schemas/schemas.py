@@ -8,6 +8,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
     func,
+    inspect,
 )
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -18,6 +19,9 @@ class BaseModel(Base):
     __abstract__ = True
     id = Column(UUID, default=uuid.uuid4, index=True, primary_key=True)
     created_at = Column(DateTime, default=func.now())
+
+    def serialize_self(self):
+        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
 
 class User(BaseModel):

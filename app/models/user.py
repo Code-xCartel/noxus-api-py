@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class UserIn(BaseModel):
     email: str
-    password: str
+    password: str = Field(min_length=8)
 
 
 class UserInExtended(UserIn):
@@ -15,6 +15,11 @@ class UserInExtended(UserIn):
 
 class UsernameUpdate(BaseModel):
     username: str
+
+
+class PasswordUpdate(BaseModel):
+    password_new: str = Field(alias="passwordNew", min_length=8)
+    password_old: str = Field(alias="passwordOld")
 
 
 class AvatarUpdate(BaseModel):
