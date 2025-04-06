@@ -5,7 +5,7 @@ from starlette.websockets import WebSocket
 
 from app.core.bound_repository import BoundRepository
 from app.repository.friends.friends import FriendsRepository
-from app.repository.sockets.websocket_service import WebSocketService
+from app.services.sockets.websocket_service import WebSocketService
 
 
 class Status(Enum):

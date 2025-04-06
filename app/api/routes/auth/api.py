@@ -1,20 +1,32 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from app.core.request import ReqDep
-from app.models.user import LoginResponse, UserIn, UserInExtended
+from app.exceptions.exceptions import EmailException
+from app.models.user import LoginResponse, UserIn
 from app.repository.auth.auth import AuthorizationRepository
+from app.services.emails.email_service import AuthEmailService
+from app.utils.strings import JSONResponse
 
 router = APIRouter()
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+# TODO: sig verification for all auth routes
+@router.post("/register", status_code=status.HTTP_200_OK)
 def register(
-    request: UserInExtended,
+    request: UserIn,
     auth_repo: AuthorizationRepository = ReqDep(AuthorizationRepository),
+    email_svc: AuthEmailService = ReqDep(AuthEmailService),
 ):
-    response = auth_repo.create_user(request)
-    return response
+    auth_repo.check_existing_user(request)
+    try:
+        email_svc.configure_auth_mail(request)
+        email_svc.send_mail()
+    except EmailException as e:
+        raise HTTPException(
+            status_code=status.HTTP_417_EXPECTATION_FAILED, detail=str(e)
+        )
+    return JSONResponse(details="Email sent successfully")
 
 
 @router.post("/login", status_code=status.HTTP_200_OK, response_model=LoginResponse)

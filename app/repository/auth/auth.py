@@ -24,6 +24,15 @@ class AuthorizationRepository(RepoHelpersMixin):
             )
         return user
 
+    def check_existing_user(self, user: UserIn):
+        existing_user = self.find_user_by_field(
+            query=user.email, field="email", skip_check=True
+        )
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="User already exists"
+            )
+
     def create_user(self, user: UserInExtended):
         user_dump = user.model_dump()
         existing_user = self.find_user_by_field(

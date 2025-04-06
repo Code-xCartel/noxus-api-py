@@ -1,11 +1,18 @@
+import base64
+import hashlib
+import hmac
+import json
+import time
 from dataclasses import dataclass
 from enum import Enum
+from urllib.parse import quote
 
 from fastapi import Request
 from jose import JWTError, jwt
 from starlette.authentication import AuthenticationError
 
 from app.core.config import ApiConfig
+from app.models.user import UserIn
 
 
 class AuthScheme(Enum):
@@ -56,6 +63,22 @@ class AuthUtils:
             return request.state.user
         else:
             return None
+
+    def generate_verification_link(self, request: UserIn):
+        secret = self.api_config.HMAC_SECRET_KEY.encode()
+        payload = {
+            "email": request.email,
+            "password": request.password,
+            "timestamp": int(time.time()),  # token valid for 3hrs
+        }
+        json_payload = json.dumps(payload, separators=(",", ":")).encode()
+        b64_payload = base64.urlsafe_b64encode(json_payload).decode()
+
+        signature = hmac.new(secret, b64_payload.encode(), hashlib.sha256).hexdigest()
+
+        return (
+            f"{self.api_config.NOXUS_URL}/auth?pkt={quote(b64_payload)}&sig={signature}"
+        )
 
 
 @dataclass(frozen=True)

@@ -48,6 +48,13 @@ class ApiConfig:
     GIPHY_API_KEY = ConfigVar("GIPHY_API_KEY", default="ABCD")
     GIPHY_RESPONSE_LIMIT = ConfigVar("GIPHY_RESPONSE_LIMIT", default=1)
 
+    MAIL_SERVICE = ConfigVar("MAIL_SERVICE", default="smtp.gmail.com")
+    MAIL_SERVICE_USER = ConfigVar("MAIL_SERVICE_USER", default="<EMAIL>")
+    MAIL_SERVICE_PASSWORD = ConfigVar("MAIL_SERVICE_PASSWORD", default="<PASSWORD>")
+
+    HMAC_SECRET_KEY = ConfigVar("HMAC_SECRET_KEY", default="secret")
+    NOXUS_URL = ConfigVar("NOXUS_URL", default="http://localhost:8000")
+
     @cached_property
     def SKIP_AUTH_ROUTES(self):
         return (
