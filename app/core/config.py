@@ -64,6 +64,8 @@ class ApiConfig:
             re.compile(rf"^{self.API_PREFIX}/openapi.json$"),
             re.compile(rf"^{self.API_PREFIX}/auth/register$"),
             re.compile(rf"^{self.API_PREFIX}/auth/login$"),
+            re.compile(rf"^{self.API_PREFIX}/health/service$"),
+            re.compile(rf"^{self.API_PREFIX}/health/database$"),
         )
 
     LOGGING_CONFIG = {

@@ -12,20 +12,29 @@ Base = declarative_base()
 
 
 class Database:
-    engine = None
+    _instance = None
+    _engine = None
+
+    def __new__(
+        cls, api_config: ApiConfig, echo: bool = False, echo_pool: bool = False
+    ) -> "Database":
+        if cls._instance is None:
+            cls._instance = super(Database, cls).__new__(cls)
+            logger.info("Initializing Postgres Engine")
+            cls._engine = create_engine(
+                api_config.DB_PG_URL, echo=echo, echo_pool=echo_pool
+            )
+        return cls._instance
 
     def __init__(
         self, api_config: ApiConfig, echo: bool = False, echo_pool: bool = False
     ) -> None:
-        db_url = api_config.DB_PG_URL
-        if Database.engine is None:
-            logger.info("Initializing Postgres Engine")
-            Database.engine = create_engine(db_url, echo=echo, echo_pool=echo_pool)
+        pass
 
     def resolve_session(self) -> Session:
         return scoped_session(
             sessionmaker(
-                bind=self.engine,
+                bind=self._engine,
                 autoflush=False,
                 autocommit=False,
                 expire_on_commit=False,

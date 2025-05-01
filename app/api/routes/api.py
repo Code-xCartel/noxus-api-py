@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.routes.auth.api import router as auth_router
 from app.api.routes.friends.api import router as friend_router
+from app.api.routes.health.api import router as health_router
 from app.api.routes.sockets.socket import router as socket_router
 from app.api.routes.users.api import router as users_router
 
@@ -14,3 +15,6 @@ router.include_router(friend_router, prefix="/friends", tags=["friends"])
 
 # Service router
 router.include_router(socket_router, prefix="/ws", tags=["sockets"])
+
+# Health check router
+router.include_router(health_router, prefix="/health", tags=["health"])
