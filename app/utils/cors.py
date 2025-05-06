@@ -6,7 +6,7 @@ from app.core.config import ApiConfig
 
 ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
 ALLOWED_ORIGINS_FOR_LOCAL = ["*"]
-ALLOWED_ORIGIN_REGEX = "https://.*\.{host}"
+# ALLOWED_ORIGIN_REGEX = "https://.*\.{host}"
 ALLOWED_HEADERS = [
     "Authorization",
     "Cache-Control",
@@ -29,9 +29,10 @@ ALLOWED_HEADERS = [
 def build_cors_config(config: ApiConfig) -> Dict[str, Union[Type[CORSMiddleware], str]]:
     cors_config = {
         "middleware_class": CORSMiddleware,
-        "allow_origin_regex": ALLOWED_ORIGIN_REGEX.format(
-            host=config.CORS_ALLOWED_HOST.replace(".", "\\.")
-        ),
+        # "allow_origin_regex": ALLOWED_ORIGIN_REGEX.format(
+        #     host=config.CORS_ALLOWED_HOST.replace(".", "\\.")
+        # ),
+        "allow_origins": config.CORS_ALLOWED_HOST,
         "allow_methods": ALLOWED_METHODS,
         "allow_headers": ALLOWED_HEADERS,
     }

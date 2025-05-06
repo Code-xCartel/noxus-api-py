@@ -37,6 +37,7 @@ class ApiConfig:
     DB_PG_URL = ConfigVar(
         "DB_PG_URL", default="postgresql://postgres:postgres@localhost/postgres"
     )
+    SCHEMA = ConfigVar("SCHEMA", default="dev")
     JWT_SECRET_KEY = ConfigVar("JWT_SECRET_KEY", default="secret")
     JWT_ALGORITHM = ConfigVar("ALGORITHM", default="HS256")
     JWT_EXPIRATION_DELTA = ConfigVar("JWT_EXPIRATION_DELTA", default=7)
