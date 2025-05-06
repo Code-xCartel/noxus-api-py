@@ -21,17 +21,16 @@ class Database:
     ) -> "Database":
         if cls._instance is None:
             cls._instance = super(Database, cls).__new__(cls)
-            cls._instance.api_config = api_config
-            logger.info("Initializing Postgres Engine")
-            cls._engine = create_engine(
-                api_config.DB_PG_URL, echo=echo, echo_pool=echo_pool
-            )
         return cls._instance
 
     def __init__(
         self, api_config: ApiConfig, echo: bool = False, echo_pool: bool = False
     ) -> None:
-        pass
+        self.api_config = api_config
+        logger.info("Initializing Postgres Engine")
+        self._engine = create_engine(
+            api_config.DB_PG_URL, echo=echo, echo_pool=echo_pool
+        )
 
     def _get_schema_translate_map(self) -> Dict:
         schema_translate_map = {None: self.api_config.SCHEMA}
