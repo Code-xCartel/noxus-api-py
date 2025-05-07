@@ -12,7 +12,7 @@ from jose import JWTError, jwt
 from starlette.authentication import AuthenticationError
 
 from app.core.config import ApiConfig
-from app.models.user import UserIn
+from app.models.user import EmailIn
 
 
 class AuthScheme(Enum):
@@ -42,7 +42,7 @@ class AuthUtils:
         if scheme not in [AuthScheme.BEARER.value]:
             raise AuthenticationError(f"Invalid authorization scheme, got {scheme}")
 
-    def extract_payload_from_token(self, token: str, is_socket: bool = False):
+    def extract_payload_from_token(self, token: str):
         try:
             payload = jwt.decode(
                 token,
@@ -64,12 +64,12 @@ class AuthUtils:
         else:
             return None
 
-    def generate_verification_link(self, request: UserIn):
+    def generate_verification_link(self, request: EmailIn):
         secret = self.api_config.HMAC_SECRET_KEY.encode()
         payload = {
             "email": request.email,
-            "password": request.password,
-            "timestamp": int(time.time()),  # token valid for 3hrs
+            "timestamp": int(time.time()),
+            "maxAgeMs": int(self.api_config.ACTIVATION_MAX_AGE),
         }
         json_payload = json.dumps(payload, separators=(",", ":")).encode()
         b64_payload = base64.urlsafe_b64encode(json_payload).decode()

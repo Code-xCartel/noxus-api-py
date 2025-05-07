@@ -5,7 +5,7 @@ from typing import Optional
 
 from app.core.config import ApiConfig
 from app.exceptions.exceptions import EmailException
-from app.models.user import UserIn
+from app.models.user import EmailIn
 from app.utils.auth_utils import AuthUtils
 from app.utils.html import account_activation_html
 
@@ -55,7 +55,7 @@ class AuthEmailService(EmailService):
         self.auth_utils = auth_utils
         super().__init__(config)
 
-    def configure_auth_mail(self, request: UserIn):
+    def configure_auth_mail(self, request: EmailIn):
         subject = "Account activation"
         link = self.auth_utils.generate_verification_link(request)
         body = account_activation_html(request.email, link)

@@ -1,16 +1,20 @@
-from typing import Union
+from typing import Optional, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 
-class UserIn(BaseModel):
+class EmailIn(BaseModel):
     email: str
+
+
+class UserIn(EmailIn):
     password: str = Field(min_length=8)
 
 
 class UserInExtended(UserIn):
     username: str
+    avatar: Optional[str] = None
 
 
 class UsernameUpdate(BaseModel):

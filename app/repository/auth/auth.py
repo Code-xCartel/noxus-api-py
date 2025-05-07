@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from starlette import status
 
 from app.core.mixin import RepoHelpersMixin
-from app.models.user import UserIn, UserInExtended
+from app.models.user import EmailIn, UserIn, UserInExtended
 from app.schemas.schemas import User
 from app.utils.strings import JSONResponse, generate_unique_id
 
@@ -24,7 +24,7 @@ class AuthorizationRepository(RepoHelpersMixin):
             )
         return user
 
-    def check_existing_user(self, user: UserIn):
+    def check_existing_user(self, user: EmailIn):
         existing_user = self.find_user_by_field(
             query=user.email, field="email", skip_check=True
         )
