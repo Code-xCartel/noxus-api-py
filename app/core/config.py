@@ -55,6 +55,7 @@ class ApiConfig:
 
     HMAC_SECRET_KEY = ConfigVar("HMAC_SECRET_KEY", default="secret")
     NOXUS_URL = ConfigVar("NOXUS_URL", default="http://localhost:8000")
+    NOXUS_ACTIVATION_ROUTE = ConfigVar("NOXUS_ACTIVATION_ROUTE", default="/activate")
 
     @cached_property
     def SKIP_AUTH_ROUTES(self):

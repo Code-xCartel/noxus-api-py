@@ -76,9 +76,7 @@ class AuthUtils:
 
         signature = hmac.new(secret, b64_payload.encode(), hashlib.sha256).hexdigest()
 
-        return (
-            f"{self.api_config.NOXUS_URL}/auth?pkt={quote(b64_payload)}&sig={signature}"
-        )
+        return f"{self.api_config.NOXUS_URL}{self.api_config.NOXUS_ACTIVATION_ROUTE}?pkt={quote(b64_payload)}&sig={signature}"
 
 
 @dataclass(frozen=True)

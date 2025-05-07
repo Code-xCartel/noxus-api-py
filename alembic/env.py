@@ -1,14 +1,9 @@
-import contextlib
-import os
 from logging.config import fileConfig
-from pathlib import Path
 
-from alembic.config import Config
-from alembic.script import write_hooks
 from sqlalchemy import engine_from_config, pool, text
 
 import app.schemas.schemas  # noqa
-from alembic import context, command
+from alembic import context
 from app.core.config import ApiConfig
 from app.database.database import Base
 
