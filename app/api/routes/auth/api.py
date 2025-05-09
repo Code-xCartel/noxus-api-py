@@ -3,7 +3,7 @@ from starlette import status
 
 from app.core.request import ReqDep
 from app.exceptions.exceptions import EmailException
-from app.models.user import EmailIn, LoginResponse, UserIn, UserInExtended
+from app.models.user import EmailIn, LoginResponse, UserIn, WorkflowIn
 from app.repository.auth.auth import AuthorizationRepository
 from app.services.emails.email_service import AuthEmailService
 from app.utils.strings import JSONResponse
@@ -31,10 +31,11 @@ def register(
 
 @router.post("/activate", status_code=status.HTTP_200_OK)
 def activate(
-    request: UserInExtended,
+    pkt: str,
+    sig: str,
     auth_repo: AuthorizationRepository = ReqDep(AuthorizationRepository),
 ):
-    response = auth_repo.create_user(request)
+    response = auth_repo.verify_and_create_user(WorkflowIn(pkt=pkt, sig=sig))
     return response
 
 

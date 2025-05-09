@@ -78,6 +78,16 @@ class AuthUtils:
 
         return f"{self.api_config.NOXUS_URL}{self.api_config.NOXUS_ACTIVATION_ROUTE}?pkt={quote(b64_payload)}&sig={signature}"
 
+    def extract_verification(self, pkt: str, sig: str):
+        secret = self.api_config.HMAC_SECRET_KEY.encode()
+
+        signature = hmac.new(secret, pkt.encode(), hashlib.sha256).hexdigest()
+        if signature != sig:
+            raise AuthenticationError()
+
+        ext = base64.urlsafe_b64decode(pkt).decode()
+        return ext
+
 
 @dataclass(frozen=True)
 class UserRealm:

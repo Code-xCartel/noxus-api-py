@@ -58,6 +58,10 @@ class ApiConfig:
     NOXUS_ACTIVATION_ROUTE = ConfigVar("NOXUS_ACTIVATION_ROUTE", default="/activate")
     ACTIVATION_MAX_AGE = ConfigVar("ACTIVATION_MAX_AGE", default=10_800_000)  # 3hrs
 
+    REDIS_HOST = ConfigVar("REDIS_HOST", default="localhost")
+    REDIS_PORT = ConfigVar("REDIS_PORT", default="3001")
+    REDIS_PASSWORD = ConfigVar("REDIS_PASSWORD", default="<PASSWORD>")
+
     @cached_property
     def SKIP_AUTH_ROUTES(self):
         return (
@@ -66,6 +70,7 @@ class ApiConfig:
             re.compile(rf"^{self.API_PREFIX}/redoc$"),
             re.compile(rf"^{self.API_PREFIX}/openapi.json$"),
             re.compile(rf"^{self.API_PREFIX}/auth/register$"),
+            re.compile(rf"^{self.API_PREFIX}/auth/activate$"),
             re.compile(rf"^{self.API_PREFIX}/auth/login$"),
             re.compile(rf"^{self.API_PREFIX}/health/service$"),
             re.compile(rf"^{self.API_PREFIX}/health/database$"),

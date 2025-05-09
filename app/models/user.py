@@ -60,3 +60,8 @@ class AvatarsSearchResponse(BaseModel):
 
     class Config:
         populate_by_name = True
+
+
+class WorkflowIn(BaseModel):
+    pkt: str
+    sig: str

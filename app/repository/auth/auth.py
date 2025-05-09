@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from starlette import status
 
 from app.core.mixin import RepoHelpersMixin
-from app.models.user import EmailIn, UserIn, UserInExtended
+from app.models.user import EmailIn, UserIn, UserInExtended, WorkflowIn
 from app.schemas.schemas import User
 from app.utils.strings import JSONResponse, generate_unique_id
 
@@ -32,6 +32,10 @@ class AuthorizationRepository(RepoHelpersMixin):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, detail="User already exists"
             )
+
+    def verify_and_create_user(self, flow: WorkflowIn):
+        user = UserInExtended(**self.auth_utils.extract_verification(flow))
+        return self.create_user(user)
 
     def create_user(self, user: UserInExtended):
         user_dump = user.model_dump()
