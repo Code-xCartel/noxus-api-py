@@ -3,7 +3,9 @@ from typing import Any, Dict
 from pydantic import BaseModel
 from starlette.websockets import WebSocket
 
+from app.core.bound_repository import BoundRepository
 from app.core.mixin import RepoHelpersMixin
+from app.services.caching.abstract_caching_service import AbstractCachingService
 
 
 class Client(BaseModel):
@@ -23,6 +25,10 @@ TODO: Websockets are not a part of ASGI app, so they wont pass through the conta
 
 class WebSocketService(RepoHelpersMixin):
     clients: Dict[str, Client] = {}
+
+    def __init__(self, repo: BoundRepository, cache: AbstractCachingService):
+        super().__init__(repo)
+        self._cache = cache
 
     async def connect(self, socket: WebSocket, payload: Any = None):
         await socket.accept()

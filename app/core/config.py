@@ -58,6 +58,7 @@ class ApiConfig:
     NOXUS_ACTIVATION_ROUTE = ConfigVar("NOXUS_ACTIVATION_ROUTE", default="/activate")
     ACTIVATION_MAX_AGE = ConfigVar("ACTIVATION_MAX_AGE", default=10_800_000)  # 3hrs
 
+    CACHING_SERVICE = ConfigVar("CACHING_SERVICE", default="redis")
     REDIS_HOST = ConfigVar("REDIS_HOST", default="localhost")
     REDIS_PORT = ConfigVar("REDIS_PORT", default="3001")
     REDIS_PASSWORD = ConfigVar("REDIS_PASSWORD", default="<PASSWORD>")

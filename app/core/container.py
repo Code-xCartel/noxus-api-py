@@ -49,19 +49,46 @@ def _get_spec(
         )
 
 
+class PatchProvider:
+    def __init__(self, patch: Any, params: Dict[str, Any]) -> None:
+        self.patch = patch
+        self.params = params
+
+
 class Provider:
     @classmethod
-    def of(cls, dependency: Any, provider: Any):
+    def of(
+        cls,
+        dependency: Any,
+        provider: Any,
+        patch_provider: Any = None,
+        patch_params: Dict[str, Any] = None,
+    ) -> "Provider":
         if isinstance(provider, Provider):
             assert provider.dependency == dependency
             return provider
-        return cls(dependency=dependency, provider=provider)
+        return cls(
+            dependency=dependency,
+            provider=provider,
+            patch_provider=PatchProvider(patch=patch_provider, params=patch_params),
+        )
 
-    def __init__(self, dependency: Any, provider: Any):
+    def __init__(
+        self, dependency: Any, provider: Any, patch_provider: PatchProvider
+    ) -> None:
         self.dependency = dependency
         self.provider = provider
+        self.patch_provider = patch_provider
 
     def resolve(self, di: "Container") -> Any:
+        if self.patch_provider.patch and not self.provider:
+            patch_params = di.collect_params(self.patch_provider.patch)
+            _provider = self.patch_provider.patch(
+                **patch_params, **self.patch_provider.params
+            )
+            provider_params = di.collect_params(_provider)
+            return _provider(**provider_params)
+
         if isinstance(self.provider, Resolved):
             return self.provider.res
         elif not callable(self.provider):
@@ -83,11 +110,18 @@ class DepRegistry:
         self._providers[provider.dependency] = provider
 
     def register(
-        self, dependency: Any, provider: Any = None, value: Any = None
+        self,
+        dependency: Any,
+        provider: Any = None,
+        value: Any = None,
+        patch_provider: Any = None,
+        patch_params: Dict[str, Any] = None,
     ) -> None:
         if value is not None:
             provider = Resolved(resolution=value)
-        self._store(provider=Provider.of(dependency, provider))
+        self._store(
+            provider=Provider.of(dependency, provider, patch_provider, patch_params)
+        )
 
     def is_registered(self, dependency: Any) -> bool:
         return dependency in self._providers

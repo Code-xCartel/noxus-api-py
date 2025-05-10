@@ -5,6 +5,7 @@ from starlette.websockets import WebSocket
 
 from app.core.bound_repository import BoundRepository
 from app.repository.friends.friends import FriendsRepository
+from app.services.caching.abstract_caching_service import AbstractCachingService
 from app.services.sockets.websocket_service import WebSocketService
 
 
@@ -24,9 +25,14 @@ class Status(Enum):
 
 
 class StatusRepository(WebSocketService):
-    def __init__(self, fr_repo: FriendsRepository, repo: BoundRepository):
+    def __init__(
+        self,
+        fr_repo: FriendsRepository,
+        repo: BoundRepository,
+        cache: AbstractCachingService,
+    ):
         self.fr_repo = fr_repo
-        super().__init__(repo=repo)
+        super().__init__(repo=repo, cache=cache)
 
     async def connect(self, socket: WebSocket, payload: Any = None):
         status = socket.headers.get("Status") or "online"
